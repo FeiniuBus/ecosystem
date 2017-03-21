@@ -2,14 +2,18 @@ package buffering
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 )
 
+// ErrNotSupport error
+var ErrNotSupport = errors.New("not support")
+
 // RequestBody is a request body that cat be reuseable
 type RequestBody struct {
-	Buffer *bytes.Buffer
+	Buffer *bytes.Reader
 	body   io.ReadCloser
 }
 
@@ -20,6 +24,15 @@ func (b *RequestBody) Read(p []byte) (int, error) {
 	}
 
 	return 0, io.EOF
+}
+
+// Seek method
+func (b *RequestBody) Seek(offset int64, whence int) (int64, error) {
+	if b.Buffer != nil {
+		return b.Buffer.Seek(offset, whence)
+	}
+
+	return 0, ErrNotSupport
 }
 
 // Close method
@@ -42,7 +55,7 @@ func NewRequestBody(r *http.Request) *RequestBody {
 	if err != nil {
 		body.Buffer = nil
 	} else {
-		body.Buffer = bytes.NewBuffer(content)
+		body.Buffer = bytes.NewReader(content)
 	}
 
 	return body
