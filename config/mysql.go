@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 )
 
@@ -49,5 +50,5 @@ func GetMysqlConnectionString(database, profile string) (string, error) {
 		}
 	}
 
-	return "", nil
+	return "", errors.New("读取mysql配置失败")
 }
