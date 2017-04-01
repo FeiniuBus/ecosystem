@@ -1,9 +1,10 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
+	"net/url"
+	"time"
 )
 
 const (
@@ -27,28 +28,9 @@ func GetMysqlConnectionString(database, profile string) (string, error) {
 
 	if m1, ok := c[mysqlSectionName].(map[string]interface{}); ok {
 		if m2, o := m1[profileName].(map[string]interface{}); o {
-			var buffer bytes.Buffer
-			var delimiter = ""
-
-			for k, v := range m2 {
-				if k == "Host" {
-					buffer.WriteString(fmt.Sprintf("%s%s=%s", delimiter, "server", v))
-				} else if k == "Port" {
-					buffer.WriteString(fmt.Sprintf("%s%s=%v", delimiter, "port", v))
-				} else if k == "User" {
-					buffer.WriteString(fmt.Sprintf("%s%s=%s", delimiter, "user_id", v))
-				} else if k == "Password" {
-					buffer.WriteString(fmt.Sprintf("%s%s=%s", delimiter, "password", v))
-				} else if k == "Charset" {
-					buffer.WriteString(fmt.Sprintf("%s%s=%s", delimiter, "characterset", v))
-				}
-				delimiter = ";"
-			}
-
-			buffer.WriteString(fmt.Sprintf("%s%s=%s", delimiter, "database", database))
-			return buffer.String(), nil
+			dsn := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s?charset=%s&parseTime=true&loc=%s", m2["User"], m2["Password"], m2["Host"], m2["Port"], database, m2["Charset"], url.QueryEscape(time.Local.String()))
+			return dsn, nil
 		}
 	}
-
 	return "", errors.New("读取mysql配置失败")
 }
