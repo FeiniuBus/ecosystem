@@ -9,10 +9,11 @@ const (
 )
 
 type redisConfig struct {
-	RedisConnectionStrings *redisNode
+	RedisConnectionStrings *RedisNode
 }
 
-type redisNode struct {
+// RedisNode is
+type RedisNode struct {
 	Endpoints          []string
 	Password           string
 	KeepAlive          int
@@ -24,8 +25,8 @@ type redisNode struct {
 	ConnectRetry       int
 }
 
-func newRedisNode() *redisNode {
-	return &redisNode{
+func newRedisNode() *RedisNode {
+	return &RedisNode{
 		KeepAlive:          -1,
 		SyncTimeout:        1000,
 		AllowAdmin:         false,
@@ -36,7 +37,7 @@ func newRedisNode() *redisNode {
 	}
 }
 
-func (n *redisNode) build() string {
+func (n *RedisNode) build() string {
 	buffer := bytes.NewBufferString("")
 	if len(n.Endpoints) == 0 {
 		return buffer.String()
@@ -64,7 +65,7 @@ func (n *redisNode) build() string {
 	return buffer.String()
 }
 
-func (n *redisNode) append(buffer *bytes.Buffer, prefix string, value interface{}) {
+func (n *RedisNode) append(buffer *bytes.Buffer, prefix string, value interface{}) {
 	s := getValue(value)
 	if s != "" {
 		if buffer.Len() != 0 {
@@ -90,8 +91,8 @@ func getValue(value interface{}) string {
 	return ""
 }
 
-// GetRedisConnectionString returns redis connection string
-func GetRedisConnectionString() (string, error) {
+// GetRedisNode returns redis node
+func GetRedisNode() (*RedisNode, error) {
 	n := newRedisNode()
 	c := &redisConfig{
 		RedisConnectionStrings: n,
@@ -99,9 +100,9 @@ func GetRedisConnectionString() (string, error) {
 
 	_, err := Load(sharedRedisFilename, &c)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	node := c.RedisConnectionStrings
-	return node.build(), nil
+	return node, nil
 }
