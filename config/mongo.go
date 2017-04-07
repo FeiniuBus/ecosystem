@@ -19,10 +19,11 @@ const (
 )
 
 type mongoConfig struct {
-	MongoURL *mongoNode `json:"MongoUrl"`
+	MongoURL *MongoNode `json:"MongoUrl"`
 }
 
-type mongoNode struct {
+// MongoNode is
+type MongoNode struct {
 	Endpoints               []string
 	AuthenticationMechanism string
 	Username                string
@@ -36,8 +37,8 @@ type mongoNode struct {
 	SocketTimeout           int
 }
 
-func newMongoNode() *mongoNode {
-	return &mongoNode{
+func newMongoNode() *MongoNode {
+	return &MongoNode{
 		AuthenticationMechanism: "",
 		ConnectTimeout:          DefaultMongoConnectTimeout,
 		MaxConnectionIdleTime:   DefaultMongoMaxConnectionIdleTime,
@@ -50,7 +51,7 @@ func newMongoNode() *mongoNode {
 	}
 }
 
-func (n *mongoNode) build() string {
+func (n *MongoNode) build() string {
 	buffer := bytes.NewBufferString("")
 	if len(n.Endpoints) == 0 {
 		return buffer.String()
@@ -116,8 +117,8 @@ func (n *mongoNode) build() string {
 	return buffer.String()
 }
 
-// GetMongoURL returns mongodb url
-func GetMongoURL(database string) (string, error) {
+// GetMongoDialInfo returns mongodb url
+func GetMongoDialInfo(database string) (*MongoNode, error) {
 	n := newMongoNode()
 	c := &mongoConfig{
 		MongoURL: n,
@@ -125,9 +126,8 @@ func GetMongoURL(database string) (string, error) {
 
 	_, err := Load(sharedMongoFilename, &c)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	c.MongoURL.DatabaseName = database
-	return c.MongoURL.build(), nil
+	return c.MongoURL, nil
 }
