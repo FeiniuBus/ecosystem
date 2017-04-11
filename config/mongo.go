@@ -129,5 +129,6 @@ func GetMongoDialInfo(database string) (*MongoNode, error) {
 		return nil, err
 	}
 
+	c.MongoURL.DatabaseName = database
 	return c.MongoURL, nil
 }
