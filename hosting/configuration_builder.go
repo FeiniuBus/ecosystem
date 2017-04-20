@@ -7,6 +7,8 @@ import (
 
 	"log"
 
+	"errors"
+
 	"github.com/go-ini/ini"
 )
 
@@ -27,9 +29,20 @@ func (this *ConfigurationBuilder) AddIniFile(fileName string) *ConfigurationBuil
 	return this
 }
 
-func (this *ConfigurationBuilder) Build() *Configuration {
-	var allSections SectionPointerSlice
+func (this *ConfigurationBuilder) AddIniFileOptional(fileName string) *ConfigurationBuilder {
+	file, err := ini.Load(this.getFilePath(fileName))
+	if err == nil {
+		this.sources = append(this.sources, NewConfigurationFromFile(file))
+	}
+	return this
+}
+
+func (this *ConfigurationBuilder) Build() (*Configuration, error) {
 	l := len(this.sources)
+	if l <= 0 {
+		return nil, errors.New("none config file to build")
+	}
+	var allSections SectionPointerSlice
 	for i, c := range this.sources {
 		for _, section := range c.Sections {
 			section.Level = l - i
@@ -53,11 +66,15 @@ func (this *ConfigurationBuilder) Build() *Configuration {
 		i++
 	}
 	this.Config = NewConfiguration(targetSections)
-	return this.Config
+	return this.Config, nil
 }
 
 func (this *ConfigurationBuilder) BuildToObject(v interface{}) error {
-	return this.Build().Object(v)
+	cfg, err := this.Build()
+	if err != nil {
+		return err
+	}
+	return cfg.Object(v)
 }
 
 func (this *ConfigurationBuilder) SetBasePath(path string) *ConfigurationBuilder {
