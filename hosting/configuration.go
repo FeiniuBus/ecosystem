@@ -55,6 +55,8 @@ func (cfg *Configuration) Object(v interface{}) error {
 			oriStr := item.Value.(string)
 			if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", oriStr); ok {
 				buffer.WriteString(oriStr)
+			} else if oriStr == "true" || oriStr == "false" {
+				buffer.WriteString(oriStr)
 			} else {
 				buffer.WriteString("\"")
 				buffer.WriteString(oriStr)
