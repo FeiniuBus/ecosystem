@@ -1,6 +1,13 @@
 package hosting
 
-import "github.com/go-ini/ini"
+import (
+	"bytes"
+	"encoding/json"
+
+	"regexp"
+
+	"github.com/go-ini/ini"
+)
 
 type Configuration struct {
 	Sections []*Section
@@ -26,6 +33,40 @@ func (cfg *Configuration) Remove(name string) {
 			}
 		}
 	}
+}
+
+func (cfg *Configuration) Object(v interface{}) error {
+	var buffer bytes.Buffer
+	buffer.WriteString("{")
+	for i, section := range cfg.Sections {
+		if i > 0 {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("\"")
+		buffer.WriteString(section.Name)
+		buffer.WriteString("\":{")
+		for j, item := range section.Items {
+			if j > 0 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString("\"")
+			buffer.WriteString(item.Key)
+			buffer.WriteString("\":")
+			oriStr := item.Value.(string)
+			if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", oriStr); ok {
+				buffer.WriteString(oriStr)
+			} else {
+				buffer.WriteString("\"")
+				buffer.WriteString(oriStr)
+				buffer.WriteString("\"")
+			}
+			j++
+		}
+		buffer.WriteString("}")
+	}
+	buffer.WriteString("}")
+	err := json.Unmarshal(buffer.Bytes(), v)
+	return err
 }
 
 type Section struct {
@@ -63,27 +104,18 @@ func (s *Section) Merge(other *Section) *Section {
 			Name:  s.Name,
 		}
 		section := make(map[string]*Item)
-		if s.Level > other.Level {
-			for _, v := range s.Items {
-				section[v.Key] = v
-			}
-			for _, v := range other.Items {
-				section[v.Key] = v
-			}
-		} else {
-			for _, v := range other.Items {
-				section[v.Key] = v
-			}
-			for _, v := range s.Items {
-				section[v.Key] = v
-			}
+		for _, v := range s.Items {
+			section[v.Key] = v
+		}
+		for _, v := range other.Items {
+			section[v.Key] = v
 		}
 		for _, item := range section {
 			target.Items = append(target.Items, item)
 		}
 		return target
 	}
-	return nil
+	return other
 }
 
 type Item struct {
@@ -98,7 +130,7 @@ func (s SectionPointerSlice) Len() int {
 }
 func (s SectionPointerSlice) Less(i, j int) bool {
 	if s[i].Name == s[j].Name {
-		return s[i].Level < s[j].Level
+		return s[i].Level > s[j].Level
 	}
 	return s[i].Name < s[j].Name
 }

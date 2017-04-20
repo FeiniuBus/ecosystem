@@ -4,23 +4,28 @@ import (
 	"os"
 )
 
-const envVarName = "GO_EnvironmentName"
+const (
+	envVarName  = "GO_ENVIRONMENT"
+	production  = "production"
+	staging     = "staging"
+	development = "development"
+)
 
 var EnvironmentName string
 
 func init() {
 	EnvironmentName = os.Getenv(envVarName)
 	if len(EnvironmentName) == 0 {
-		EnvironmentName = "Production"
+		EnvironmentName = production
 	}
 }
 
 func IsProduction() bool {
-	return EnvironmentName == "Production"
+	return EnvironmentName == production
 }
 func IsStaging() bool {
-	return EnvironmentName == "Staging"
+	return EnvironmentName == staging
 }
 func IsDevelopment() bool {
-	return EnvironmentName == "Development"
+	return EnvironmentName == development
 }
