@@ -6,6 +6,8 @@ import (
 
 	"regexp"
 
+	"strconv"
+
 	"github.com/go-ini/ini"
 )
 
@@ -52,14 +54,13 @@ func (cfg *Configuration) Object(v interface{}) error {
 			buffer.WriteString("\"")
 			buffer.WriteString(item.Key)
 			buffer.WriteString("\":")
-			oriStr := item.Value.(string)
-			if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", oriStr); ok {
-				buffer.WriteString(oriStr)
-			} else if oriStr == "true" || oriStr == "false" {
-				buffer.WriteString(oriStr)
+			if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", item.Value); ok {
+				buffer.WriteString(item.Value)
+			} else if item.Value == "true" || item.Value == "false" {
+				buffer.WriteString(item.Value)
 			} else {
 				buffer.WriteString("\"")
-				buffer.WriteString(oriStr)
+				buffer.WriteString(item.Value)
 				buffer.WriteString("\"")
 			}
 			j++
@@ -77,7 +78,7 @@ type Section struct {
 	Items []*Item
 }
 
-func (s *Section) Item(key string) interface{} {
+func (s *Section) Item(key string) *Item {
 	for _, item := range s.Items {
 		if item.Key == key {
 			return item
@@ -122,7 +123,76 @@ func (s *Section) Merge(other *Section) *Section {
 
 type Item struct {
 	Key   string
-	Value interface{}
+	Value string
+}
+
+func (item *Item) String() string {
+	return item.Value
+}
+
+func (item *Item) Int() (int, error) {
+	val, err := strconv.ParseInt(item.Value, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	return int(val), nil
+}
+
+func (item *Item) MustInt() int {
+	val, _ := item.Int()
+	return val
+}
+
+func (item *Item) Int64() (int64, error) {
+	val, err := strconv.ParseInt(item.Value, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return val, nil
+}
+
+func (item *Item) MustInt64() int64 {
+	val, _ := item.Int64()
+	return val
+}
+
+func (item *Item) Float32() (float32, error) {
+	val, err := strconv.ParseFloat(item.Value, 32)
+	if err != nil {
+		return 0, err
+	}
+	return float32(val), nil
+}
+
+func (item *Item) MustFloat32() float32 {
+	val, _ := item.Float32()
+	return val
+}
+
+func (item *Item) Float64() (float64, error) {
+	val, err := strconv.ParseFloat(item.Value, 64)
+	if err != nil {
+		return 0, err
+	}
+	return val, nil
+}
+
+func (item *Item) MustFloat64() float64 {
+	val, _ := item.Float64()
+	return val
+}
+
+func (item *Item) Bool() (bool, error) {
+	val, err := strconv.ParseBool(item.Value)
+	if err != nil {
+		return false, err
+	}
+	return val, nil
+}
+
+func (item *Item) MustBool() bool {
+	val, _ := item.Bool()
+	return val
 }
 
 type SectionPointerSlice []*Section
