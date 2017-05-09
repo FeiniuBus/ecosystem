@@ -29,6 +29,7 @@ type MongoNode struct {
 	Username                string
 	Password                string
 	DatabaseName            string
+	ReplicaSet              string
 	ConnectTimeout          int
 	MaxConnectionIdleTime   int
 	MaxConnectionLifeTime   int
@@ -48,6 +49,7 @@ func newMongoNode() *MongoNode {
 		SocketTimeout:           DefaultMongoSocketTimeout,
 		Username:                "",
 		Password:                "",
+		ReplicaSet:              "",
 	}
 }
 
@@ -83,6 +85,9 @@ func (n *MongoNode) build() string {
 	}
 
 	query := bytes.NewBufferString("")
+	if n.ReplicaSet != "" {
+		query.WriteString(fmt.Sprintf("replicaSet=%s;", n.ReplicaSet))
+	}
 	if n.AuthenticationMechanism != "" {
 		query.WriteString(fmt.Sprintf("authMechanism=%s;", n.AuthenticationMechanism))
 	}
