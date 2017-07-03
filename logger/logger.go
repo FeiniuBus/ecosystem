@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -13,6 +14,25 @@ type Config struct {
 	LogLevel       string
 	EnableSyslog   bool
 	SyslogFacility string
+}
+
+// DefaultConfig is
+func DefaultConfig() *Config {
+	result := &Config{
+		LogLevel:       "INFO",
+		EnableSyslog:   true,
+		SyslogFacility: "SYSLOG",
+	}
+	return result
+}
+
+// New is
+func New(config *Config) *log.Logger {
+	_, _, _, out, ok := setup(config)
+	if !ok {
+		return log.New(os.Stdout, "", log.LstdFlags)
+	}
+	return log.New(out, "", log.LstdFlags)
 }
 
 // Setup is used to perform setup of serveral logging objects
