@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -16,17 +15,8 @@ type Config struct {
 	SyslogFacility string
 }
 
-// New is
-func New(config *Config) *log.Logger {
-	_, _, _, out, ok := setup(config)
-	if !ok {
-		return log.New(os.Stdout, "", log.LstdFlags)
-	}
-	return log.New(out, "", log.LstdFlags)
-}
-
 // Setup is used to perform setup of serveral logging objects
-func setup(config *Config) (*LevelFilter, *GatedWriter, *LogWriter, io.Writer, bool) {
+func Setup(config *Config) (*LevelFilter, *GatedWriter, *LogWriter, io.Writer, bool) {
 	logGate := &GatedWriter{
 		Writer: os.Stdout,
 	}
