@@ -12,6 +12,16 @@ type builtinLogger struct {
 	*builtinWriter
 }
 
+// DefaultConfig is
+func DefaultConfig() *Config {
+	result := &Config{
+		LogLevel:       "INFO",
+		EnableSyslog:   true,
+		SyslogFacility: "SYSLOG",
+	}
+	return result
+}
+
 // NewLogger is used to construct a new Syslogger
 func NewLogger(p Priority, facility, tag string) (Syslogger, error) {
 	fPriority, err := facilityPriority(facility)
