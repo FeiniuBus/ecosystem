@@ -3,9 +3,7 @@ package hosting
 import (
 	"bytes"
 	"encoding/json"
-
 	"regexp"
-
 	"strconv"
 
 	"strings"
@@ -235,6 +233,7 @@ func NewConfiguration(sections []*Section) *Configuration {
 	c.Sections = sections
 	return c
 }
+
 func NewConfigurationFromFile(file *ini.File) *Configuration {
 	c := new(Configuration)
 	sections := file.Sections()

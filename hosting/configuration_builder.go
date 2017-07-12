@@ -1,13 +1,10 @@
 package hosting
 
 import (
-	"path"
-
-	"sort"
-
-	"log"
-
 	"errors"
+	"log"
+	"path"
+	"sort"
 
 	"github.com/go-ini/ini"
 )
