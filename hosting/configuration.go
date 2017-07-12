@@ -8,6 +8,8 @@ import (
 
 	"strconv"
 
+	"strings"
+
 	"github.com/go-ini/ini"
 )
 
@@ -54,14 +56,20 @@ func (cfg *Configuration) Object(v interface{}) error {
 			buffer.WriteString("\"")
 			buffer.WriteString(item.Key)
 			buffer.WriteString("\":")
-			if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", item.Value); ok {
-				buffer.WriteString(item.Value)
-			} else if item.Value == "true" || item.Value == "false" {
-				buffer.WriteString(item.Value)
+			if strings.HasPrefix(item.Value, "@") {
+				buffer.WriteString("\"")
+				buffer.WriteString(item.Value[1:])
+				buffer.WriteString("\"")
 			} else {
-				buffer.WriteString("\"")
-				buffer.WriteString(item.Value)
-				buffer.WriteString("\"")
+				if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", item.Value); ok {
+					buffer.WriteString(item.Value)
+				} else if item.Value == "true" || item.Value == "false" {
+					buffer.WriteString(item.Value)
+				} else {
+					buffer.WriteString("\"")
+					buffer.WriteString(item.Value)
+					buffer.WriteString("\"")
+				}
 			}
 			j++
 		}
