@@ -54,12 +54,20 @@ func (cfg *Configuration) Object(v interface{}) error {
 			buffer.WriteString("\"")
 			buffer.WriteString(item.Key)
 			buffer.WriteString("\":")
+			const (
+				numPattern = "^(-|\\+)?\\d+(\\.\\d+)?$"
+			)
 			if strings.HasPrefix(item.Value, "@") {
 				buffer.WriteString("\"")
-				buffer.WriteString(item.Value[1:])
+				sNum := item.Value[1:]
+				if ok, _ := regexp.MatchString(numPattern, sNum); ok {
+					buffer.WriteString(sNum)
+				} else {
+					buffer.WriteString(item.Value)
+				}
 				buffer.WriteString("\"")
 			} else {
-				if ok, _ := regexp.MatchString("^(-|\\+)?\\d+(\\.\\d+)?$", item.Value); ok {
+				if ok, _ := regexp.MatchString(numPattern, item.Value); ok {
 					buffer.WriteString(item.Value)
 				} else if item.Value == "true" || item.Value == "false" {
 					buffer.WriteString(item.Value)
