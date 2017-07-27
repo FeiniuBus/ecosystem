@@ -32,3 +32,11 @@ func Wrapf(code int, format string, a ...interface{}) *ErrorWrap {
 		What:       err,
 	}
 }
+
+// WrapError defines a ErrorWrap
+func WrapError(code int, err error) *ErrorWrap {
+	return &ErrorWrap{
+		StatusCode: code,
+		What:       err,
+	}
+}
